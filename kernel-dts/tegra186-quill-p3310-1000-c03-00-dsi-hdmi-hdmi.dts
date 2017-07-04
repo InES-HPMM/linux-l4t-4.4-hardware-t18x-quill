@@ -36,10 +36,11 @@
 		sor {
 			status = "okay";
 			dp-display {
+				bootloader-status = "disabled";
 				status = "disabled";
 			};
 			hdmi-display {
-				bootloader-status = "disabled";
+				bootloader-status = "okay";
 				status = "okay";
 				disp-default-out {
 					nvidia,out-hdcp-policy = <TEGRA_DC_HDCP_POLICY_ALWAYS_OFF>;
