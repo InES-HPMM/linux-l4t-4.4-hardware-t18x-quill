@@ -1,0 +1,511 @@
+/*
+ * tegra186-quill-p3310-c03-00-base.dts Quill C03 Board
+ *
+ * Copyright (c) 2016-2017, NVIDIA CORPORATION. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; version 2 of the License.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+ * more details.
+ */
+
+#include "tegra186-quill-p3310-1000-a00-00-base.dts"
+
+/ {
+	nvidia,dtsfilename = __FILE__;
+	nvidia,dtbbuildtime = __DATE__, __TIME__;
+
+        nvidia,boardids = "3310:0000:C03";
+        nvidia,proc-boardid = "3310:0000:C03";
+
+	pinmux@2430000 {
+		common {
+			gpio_edp2_pp5 {
+				status = "okay";
+			};
+
+			gpio_edp3_pp6 {
+				status = "okay";
+			};
+		};
+	};
+
+	gpio@2200000 {
+		sdmmc-wake-support-input {
+			status = "okay";
+		};
+
+		sdmmc-wake-support-output {
+			status = "okay";
+		};
+	};
+
+	fixed-regulators {
+		regulator@1 {
+			gpio = <&tegra_main_gpio TEGRA_MAIN_GPIO(P, 6) 0>;
+                };
+	};
+
+	sdhci@3400000 {
+		cd-gpios = <&tegra_main_gpio TEGRA_MAIN_GPIO(P, 5) 0>;
+		nvidia,cd-wakeup-capable;
+	};
+
+	i2c@3160000 {
+		ina3221x@40 {
+			channel@0 {
+				ti,shunt-resistor-mohm = <10>;
+			};
+			channel@1 {
+				ti,shunt-resistor-mohm = <10>;
+			};
+		};
+		ina3221x@41 {
+			channel@0 {
+				ti,shunt-resistor-mohm = <20>;
+			};
+			channel@1 {
+				ti,shunt-resistor-mohm = <10>;
+			};
+			channel@2 {
+				ti,rail-name = "VDD_SYS_DDR";
+				ti,shunt-resistor-mohm = <10>;
+			};
+		};
+	};
+
+	ahci-sata@3507000 {
+		gpios = <&spmic 7 0>;
+	};
+
+	pcie-controller@10003000 {
+		pci@1,0 {
+			nvidia,num-lanes = <4>;
+			nvidia,disable-clock-request;
+		};
+		pci@2,0 {
+			nvidia,num-lanes = <0>;
+		};
+		pci@3,0 {
+			nvidia,num-lanes = <1>;
+		};
+	};
+
+        xhci@3530000 {
+		phys = <&tegra_xusb_padctl TEGRA_PADCTL_PHY_UTMI_P(0)>,
+			<&tegra_xusb_padctl TEGRA_PADCTL_PHY_UTMI_P(1)>,
+			<&tegra_xusb_padctl TEGRA_PADCTL_PHY_USB3_P(0)>;
+		phy-names = "utmi-0", "utmi-1", "usb3-0";
+	};
+
+	pinctrl@3520000 {
+		pinmux {
+			usb3-std-A-port2 {
+				nvidia,lanes = "usb3-0";
+			};
+		};
+	};
+
+	bluedroid_pm {
+		bluedroid_pm,reset-gpio = <&tegra_main_gpio TEGRA_MAIN_GPIO(H, 5) 0>;
+	};
+
+	bpmp_i2c {
+		spmic@3c {
+			pinmux@0 {
+				pin_gpio2 {
+					status = "disabled";
+				};
+				pin_gpio3 {
+					status = "disabled";
+				};
+				pin_gpio7 {
+					drive-push-pull = <1>;
+				};
+			};
+
+			regulators {
+				ldo0 {
+					maxim,active-fps-source = <MAX77620_FPS_SRC_NONE>;
+				};
+
+				ldo6 {
+					maxim,active-fps-source = <MAX77620_FPS_SRC_NONE>;
+					regulator-boot-on;
+					regulator-always-on;
+				};
+
+				ldo7 {
+					regulator-min-microvolt = <1000000>;
+					regulator-max-microvolt = <1000000>;
+				};
+
+				ldo8 {
+					regulator-name = "dvdd-pex";
+					regulator-min-microvolt = <1000000>;
+					regulator-max-microvolt = <1000000>;
+				};
+			};
+		};
+	};
+
+	/*** HDMI2CSI ***/
+
+	/delete-node/ plugin-manager;
+
+	/* set camera gpio direction to output */
+	pinmux@2430000 {
+		common {
+			/*
+			 * Pull down the INT pin of the TC358840 (HDMI IN A) while
+			 * in reset in order to set i2c address 0x0F.
+			 */
+			qspi_sck_pr0 {
+				nvidia,pins = "qspi_sck_pr0";
+				nvidia,function = "rsvd1";
+				nvidia,enable-input = <TEGRA_PIN_ENABLE>;
+				nvidia,pull = <TEGRA_PIN_PULL_DOWN>;
+				nvidia,tristate = <TEGRA_PIN_DISABLE>;
+			};
+
+			/*
+			 * Pull up the INT pin of the TC358840 (HDMI IN B) while
+			 * in reset in order to set i2c address 0x1F.
+			 */
+			gpio_cam3_pn2 {
+				nvidia,pins = "gpio_cam3_pn2";
+				nvidia,function = "rsvd2";
+				nvidia,enable-input = <TEGRA_PIN_ENABLE>;
+				nvidia,pull = <TEGRA_PIN_PULL_UP>;
+				nvidia,tristate = <TEGRA_PIN_DISABLE>;
+			};
+		};
+	};
+
+	/* set camera gpio direction to output */
+	gpio@2200000 {
+		camera-control-output-low {
+			status = "okay";
+			gpio-hog;
+			output-low;
+			gpios = <TEGRA_MAIN_GPIO(R, 5) 0
+				 TEGRA_MAIN_GPIO(R, 1) 0>;
+			label = "cam0-rst", "cam1-rst";
+		};
+
+		camera-control-input {
+			status = "okay";
+			gpio-hog;
+			input;
+			gpios = <TEGRA_MAIN_GPIO(R, 0) 0
+				 TEGRA_MAIN_GPIO(N, 2) 0>;
+			label = "cam0-int", "cam1-int";
+		};
+	};
+
+	i2c@3180000 {
+		status = "okay";
+
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		/* HDMI IN A (4K) */
+		tc358840@0f {
+			compatible = "toshiba,tc358840";
+			reg = <0x0f>;
+			status = "okay";
+			devnode = "video0";
+
+			/* Power Supply */
+			vdig-supply = <&en_vdd_cam_1v2>;
+			vif-supply = <&en_vdd_cam>;
+
+			/* Reset */
+			reset-gpios = <&tegra_main_gpio TEGRA_MAIN_GPIO(R, 5) GPIO_ACTIVE_LOW>;
+
+			/* Interrupt */
+			interrupt-parent = <&tegra_main_gpio>;
+			interrupts = <TEGRA_MAIN_GPIO(R, 0) IRQ_TYPE_LEVEL_HIGH>;
+
+			refclk_hz = <48000000>; /* 40 - 50 MHz */
+
+			ddc5v_delay = <1>;		/* 50 ms */
+
+			/* HDCP */
+			/* TODO: Not yet implemented */
+			enable_hdcp = <0>;
+
+			/* CSI Output */
+			/* Enable TX0 (4 lanes) & TX1 (4 lanes) */
+			csi_port = <3>;
+
+			lineinitcnt = <0x00000FA0>;
+			lptxtimecnt = <0x00000004>;
+			tclk_headercnt = <0x00180203>;
+			tclk_trailcnt = <0x00040005>;
+			ths_headercnt = <0x000D0004>;
+			twakeup = <0x00003E80>;
+			tclk_postcnt = <0x0000000A>;
+			ths_trailcnt = <0x00080006>;
+			hstxvregcnt = <0x00000020>;
+
+			/* PLL */
+			/* Bps per lane is (refclk_hz / pll_prd) * pll_fbd */
+			pll_prd = <10>;
+			pll_fbd = <125>;
+
+			port@0 {
+				ret = <0>;
+				hdmi2csi_tc358840_out0: endpoint {
+					csi-port = <0>;
+					bus-width = <8>;
+					remote-endpoint = <&hdmi2csi_csi_in0>;
+				};
+			};
+		};
+
+		/* HDMI IN B (Full HD) */
+		tc358840@1f {
+			compatible = "toshiba,tc358840";
+			reg = <0x1f>;
+			status = "okay";
+			devnode = "video1";
+
+			/* Power Supply */
+			vdig-supply = <&en_vdd_cam_1v2>;
+			vif-supply = <&en_vdd_cam>;
+
+			/* Reset */
+			reset-gpios = <&tegra_main_gpio TEGRA_MAIN_GPIO(R, 1) GPIO_ACTIVE_LOW>;
+
+			/* Interrupt */
+			interrupt-parent = <&tegra_main_gpio>;
+			interrupts = <TEGRA_MAIN_GPIO(N, 2) IRQ_TYPE_LEVEL_HIGH>;
+
+			refclk_hz = <48000000>; /* 40 - 50 MHz */
+
+			ddc5v_delay = <1>;	/* 50 ms */
+
+			/* HDCP */
+			/* TODO: Not yet implemented */
+			enable_hdcp = <0>;
+
+			/* CSI Output */
+			csi_port = <1>;		/* Enable TX0 only */
+
+			lineinitcnt = <0x00000FA0>;
+			lptxtimecnt = <0x00000004>;
+			tclk_headercnt = <0x00180203>;
+			tclk_trailcnt = <0x00040005>;
+			ths_headercnt = <0x000D0004>;
+			twakeup = <0x00003E80>;
+			tclk_postcnt = <0x0000000A>;
+			ths_trailcnt = <0x00080006>;
+			hstxvregcnt = <0x00000020>;
+
+			/* PLL */
+			/* Bps per lane is (refclk_hz / pll_prd) * pll_fbd */
+			pll_prd = <10>;
+			pll_fbd = <125>;
+
+			port@0 {
+				ret = <0>;
+				hdmi2csi_tc358840_out1: endpoint {
+					csi-port = <4>;
+					bus-width = <4>;
+					remote-endpoint = <&hdmi2csi_csi_in1>;
+				};
+			};
+		};
+	};
+
+	host1x {
+		vi@15700000 {
+			num-channels = <2>;
+			ports {
+				#address-cells = <1>;
+				#size-cells = <0>;
+				port@0 {
+					status = "okay";
+					reg = <0>;
+					hdmi2csi_vi_in0: endpoint {
+						status = "okay";
+						csi-port = <0>;
+						bus-width = <8>;
+						remote-endpoint = <&hdmi2csi_csi_out0>;
+					};
+				};
+				port@1 {
+					status = "okay";
+					reg = <1>;
+					hdmi2csi_vi_in1: endpoint {
+						status = "okay";
+						csi-port = <4>;
+						bus-width = <4>;
+						remote-endpoint = <&hdmi2csi_csi_out1>;
+					};
+				};
+			};
+		};
+
+		nvcsi@150c0000 {
+			num-channels = <2>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+			channel@0 {
+				status = "okay";
+				reg = <0>;
+				ports {
+					#address-cells = <1>;
+					#size-cells = <0>;
+					port@0 {
+						status = "okay";
+						reg = <0>;
+						hdmi2csi_csi_in0: endpoint@0 {
+							status = "okay";
+							csi-port = <0>;
+							bus-width = <8>;
+							remote-endpoint = <&hdmi2csi_tc358840_out0>;
+						};
+					};
+					port@1 {
+						status = "okay";
+						reg = <1>;
+						hdmi2csi_csi_out0: endpoint@1 {
+							status = "okay";
+							remote-endpoint = <&hdmi2csi_vi_in0>;
+						};
+					};
+				};
+			};
+			channel@1 {
+				status = "okay";
+				reg = <1>;
+				ports {
+					#address-cells = <1>;
+					#size-cells = <0>;
+					port@0 {
+						status = "okay";
+						reg = <0>;
+						hdmi2csi_csi_in1: endpoint@2 {
+							status = "okay";
+							csi-port = <4>;
+							bus-width = <4>;
+							remote-endpoint = <&hdmi2csi_tc358840_out1>;
+						};
+					};
+					port@1 {
+						status = "okay";
+						reg = <1>;
+						hdmi2csi_csi_out1: endpoint@3 {
+							status = "okay";
+							remote-endpoint = <&hdmi2csi_vi_in1>;
+						};
+					};
+				};
+			};
+		};
+	};
+
+	tegra-camera-platform {
+		/**
+		* Physical settings to calculate max ISO BW
+		*
+		* num_csi_lanes = <>;
+		* Total number of CSI lanes when all cameras are active
+		*
+		* max_lane_speed = <>;
+		* Max lane speed in Kbit/s
+		*
+		* min_bits_per_pixel = <>;
+		* Min bits per pixel
+		*
+		* vi_peak_byte_per_pixel = <>;
+		* Max byte per pixel for the VI ISO case
+		*
+		* vi_bw_margin_pct = <>;
+		* Vi bandwidth margin in percentage
+		*
+		* max_pixel_rate = <>;
+		* Max pixel rate in Kpixel/s for the ISP ISO case
+		*
+		* isp_peak_byte_per_pixel = <>;
+		* Max byte per pixel for the ISP ISO case
+		*
+		* isp_bw_margin_pct = <>;
+		* Isp bandwidth margin in percentage
+		*/
+		num_csi_lanes = <12>;
+		max_lane_speed = <1500000>;
+		min_bits_per_pixel = <16>;
+		vi_peak_byte_per_pixel = <3>;
+		vi_bw_margin_pct = <25>;
+		// max_pixel_rate = <0>;
+		isp_peak_byte_per_pixel = <3>;
+		isp_bw_margin_pct = <25>;
+
+		/**
+		* The general guideline for naming badge_info contains 3 parts, and is as follows,
+		* The first part is the camera_board_id for the module; if the module is in a FFD
+		* platform, then use the platform name for this part.
+		* The second part contains the position of the module, ex. “rear” or “front”.
+		* The third part contains the last 6 characters of a part number which is found
+		* in the module's specsheet from the vender.
+		*/
+		modules {
+			module0 {
+				status = "okay";
+				badge = "hdmi2csi_left_358840";
+				position = "left";
+				orientation = "1";
+				drivernode0 {
+					/* Declare PCL support driver (classically known as guid)  */
+					pcl_id = "v4l2_sensor";
+					/* Driver v4l2 device name */
+					devname = "tc358840 6-000f";
+					/* Declare the device-tree hierarchy to driver instance */
+					proc-device-tree = "/proc/device-tree/i2c@3180000/tc358840@0f";
+				};
+			};
+			module1 {
+				status = "okay";
+				badge = "hdmi2csi_right_358840";
+				position = "right";
+				orientation = "1";
+				drivernode0 {
+					/* Declare PCL support driver (classically known as guid)  */
+					pcl_id = "v4l2_sensor";
+					/* Driver v4l2 device name */
+					devname = "tc358840 6-001f";
+					/* Declare the device-tree hierarchy to driver instance */
+					proc-device-tree = "/proc/device-tree/i2c@3180000/tc358840@1f";
+				};
+			};
+		};
+	};
+
+	fixed-regulators {
+		/*** Enable power supply for HDMI extension board ***/
+		/* VDD_SYS_EN */
+		en_vdd_sys: regulator@118 {
+			regulator-boot-on;
+			regulator-always-on;
+		};
+
+		/* CAM_VDD_1V8_EN */
+		en_vdd_cam: regulator@2 {
+			regulator-boot-on;
+			regulator-always-on;
+		};
+
+		/* CAM_VDD_1V2_EN */
+		en_vdd_cam_1v2: regulator@12 {
+			regulator-boot-on;
+			regulator-always-on;
+		};
+	};
+};
