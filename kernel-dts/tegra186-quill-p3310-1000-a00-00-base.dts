@@ -162,9 +162,37 @@
 			status = "disabled";
 			dp-display {
 				status = "disabled";
+				nvidia,fbcon-default-mode {
+					clock-frequency = <27027000>;
+					hactive = <720>;
+					vactive = <480>;
+					hfront-porch = <16>;
+					hback-porch = <60>;
+					hsync-len = <62>;
+					vfront-porch = <9>;
+					vback-porch = <30>;
+					vsync-len = <6>;
+					nvidia,h-ref-to-sync = <1>;
+					nvidia,v-ref-to-sync = <1>;
+					vmode = <0x400000>;	/* FB_VMODE_NONINTERLACED | FB_VMODE_IS_CEA */
+				};
 			};
 			hdmi-display {
 				status = "disabled";
+				nvidia,fbcon-default-mode {
+					clock-frequency = <27027000>;
+					hactive = <720>;
+					vactive = <480>;
+					hfront-porch = <16>;
+					hback-porch = <60>;
+					hsync-len = <62>;
+					vfront-porch = <9>;
+					vback-porch = <30>;
+					vsync-len = <6>;
+					nvidia,h-ref-to-sync = <1>;
+					nvidia,v-ref-to-sync = <1>;
+					vmode = <0x400000>;	/* FB_VMODE_NONINTERLACED | FB_VMODE_IS_CEA */
+				};
 			};
 
 			panel-s-edp-uhdtv-15-6 {
@@ -182,9 +210,37 @@
 			status = "okay";
 			hdmi-display {
 				status = "okay";
+				nvidia,fbcon-default-mode {
+					clock-frequency = <27027000>;
+					hactive = <720>;
+					vactive = <480>;
+					hfront-porch = <16>;
+					hback-porch = <60>;
+					hsync-len = <62>;
+					vfront-porch = <9>;
+					vback-porch = <30>;
+					vsync-len = <6>;
+					nvidia,h-ref-to-sync = <1>;
+					nvidia,v-ref-to-sync = <1>;
+					vmode = <0x400000>;	/* FB_VMODE_NONINTERLACED | FB_VMODE_IS_CEA */
+				};
 			};
 			dp-display {
 				status = "disabled";
+				nvidia,fbcon-default-mode {
+					clock-frequency = <27027000>;
+					hactive = <720>;
+					vactive = <480>;
+					hfront-porch = <16>;
+					hback-porch = <60>;
+					hsync-len = <62>;
+					vfront-porch = <9>;
+					vback-porch = <30>;
+					vsync-len = <6>;
+					nvidia,h-ref-to-sync = <1>;
+					nvidia,v-ref-to-sync = <1>;
+					vmode = <0x400000>;	/* FB_VMODE_NONINTERLACED | FB_VMODE_IS_CEA */
+				};
 			};
 		};
 
