@@ -19,8 +19,20 @@
 
 / {
 	nvidia,dtsfilename = __FILE__;
+	nvidia,dtbbuildtime = __DATE__, __TIME__;
 
 	host1x {
+		nvdisplay@15200000 {
+			status = "okay";
+		};
+
+		dsi {
+			status = "okay";
+			panel-s-wuxga-8-0 {
+				status = "okay";
+			};
+		};
+
 		nvdisplay@15220000 {
 			status = "okay";
 			/delete-property/ vdd-dp-pwr-supply;
@@ -53,7 +65,68 @@
 		};
 	};
 
-	plugin-manager {
-		/delete-node/ fragment-e3320-dp;
+	i2c@3160000 {
+		e3320_tca_gpio: tca9539@75 {
+			compatible = "ti,tca9539";
+			status = "okay";
+			reg = <0x75>;
+			gpio-controller;
+			#gpio-cells = <2>;
+			vcc-supply = <&battery_reg>;
+			5v0_hdmi_en {
+				gpio-hog;
+				gpios = <14 0>;
+				output-high;
+				label = "hdmi_en";
+			};
+		};
+
+		gpio_i2c_0_21: gpio@21 {
+			compatible = "ti,tca6408";
+			status = "okay";
+			reg = <0x21>;
+			gpio-controller;
+			#gpio-cells = <2>;
+			vcc-supply = <&battery_reg>;
+			vpp-vmm-rails {
+				gpio-hog;
+				gpios = <2 0 3 0>;
+				output-high;
+				label = "vmm-en-rail", "vmm-en-rail";
+			};
+		};
+
+		tps65132@3e {
+			reg = <0x3e>;
+			compatible = "ti,tps65132";
+			status = "okay";
+			vpp_lcd: outp {
+				regulator-name = "outp";
+				regulator-min-microvolt = <4000000>;
+				regulator-max-microvolt = <6000000>;
+				enable-active-high;
+				ti,enable-gpio = <&gpio_i2c_0_77 4 0>;
+			};
+
+			vmm_lcd: outn {
+				regulator-name = "outn";
+				regulator-min-microvolt = <4000000>;
+				regulator-max-microvolt = <6000000>;
+				enable-active-high;
+				ti,enable-gpio = <&gpio_i2c_0_21 2 0>;
+				ti,active-discharge-gpio = <&gpio_i2c_0_21 3 0>;
+				ti,active-discharge-time = <2000>; /* in us */
+			};
+		};
+
+		lp8557-backlight-s-wuxga-8-0@2c {
+			status = "okay";
+		};
+	};
+
+	fixed-regulators {
+		regulator@10 {
+			gpio = <&gpio_i2c_0_21 0 0>;
+		};
 	};
 };
