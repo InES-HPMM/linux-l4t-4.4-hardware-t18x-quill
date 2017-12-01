@@ -129,4 +129,8 @@
 			gpio = <&gpio_i2c_0_21 0 0>;
 		};
 	};
+
+	plugin-manager {
+		/delete-node/ fragment-e3320-dp;
+	};
 };
